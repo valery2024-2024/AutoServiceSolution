@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="AutoService.Core/AutoService.Core.csproj" />
+  <Project Path="AutoService.Infrastructure/AutoService.Infrastructure.csproj" />
+  <Project Path="AutoService.Web/AutoService.Web.csproj" />
+</Solution>
