@@ -1,0 +1,70 @@
+@page "/clients"
+@rendermode InteractiveServer
+@using Microsoft.EntityFrameworkCore
+@using AutoService.Core.Entities
+@using AutoService.Infrastructure.Data
+@inject AppDbContext DbContext
+
+<h3>Клієнти</h3>
+
+<div class="mb-3">
+    <input class="form-control" placeholder="Ім'я"
+           @bind="newClientName" />
+</div>
+
+<div class="mb-3">
+    <input class="form-control" placeholder="Телефон"
+           @bind="newClientPhone" />
+</div>
+
+<button class="btn btn-primary" @onclick="AddClient">
+    Додати клієнта
+</button>
+
+<hr />
+
+<h4>Список клієнтів:</h4>
+
+@if (clients == null)
+{
+    <p>Завантаження...</p>
+}
+else
+{
+    <ul>
+        @foreach (var client in clients)
+        {
+            <li>
+                @client.Name - @client.Phone
+            </li>
+        }
+    </ul>
+}
+
+@code {
+
+    private string newClientName;
+    private string newClientPhone;
+
+    private List<Client> clients;
+
+    protected override async Task OnInitializedAsync()
+    {
+        clients = await DbContext.Clients.ToListAsync();
+    }
+
+    private async Task AddClient()
+    {
+        var client = new Client(newClientName, newClientPhone);
+
+        DbContext.Clients.Add(client);
+        await DbContext.SaveChangesAsync();
+
+        clients = await DbContext.Clients.ToListAsync();
+
+        newClientName = string.Empty;
+        newClientPhone = string.Empty;
+
+        StateHasChanged();
+    }
+}

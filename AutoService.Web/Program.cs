@@ -1,6 +1,11 @@
+using Microsoft.EntityFrameworkCore;
+using AutoService.Infrastructure.Data;
 using AutoService.Web.Components;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlite("Data Source=autoservice.db"));
 
 // Add services to the container.
 builder.Services.AddRazorComponents()

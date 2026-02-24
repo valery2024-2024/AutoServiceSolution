@@ -1,0 +1,113 @@
+@page "/vehicles"
+@rendermode InteractiveServer
+
+@using Microsoft.EntityFrameworkCore
+@using AutoService.Core.Entities
+@using AutoService.Infrastructure.Data
+
+@inject AppDbContext DbContext
+
+<h3>Автомобілі</h3>
+
+<div class="mb-2">
+    <input class="form-control" placeholder="Марка"
+           @bind="newBrand" />
+</div>
+
+<div class="mb-2">
+    <input class="form-control" placeholder="Модель"
+           @bind="newModel" />
+</div>
+
+<div class="mb-2">
+    <input class="form-control" placeholder="Рік"
+           @bind="newYear" />
+</div>
+
+<div class="mb-2">
+    <input class="form-control" placeholder="VIN"
+           @bind="newVin" />
+</div>
+
+<div class="mb-2">
+    <select class="form-control" @bind="selectedClientId">
+        <option value="0">-- Оберіть клієнта --</option>
+        @foreach (var client in clients)
+        {
+            <option value="@client.Id">@client.Name</option>
+        }
+    </select>
+</div>
+
+<button class="btn btn-success" @onclick="AddVehicle">
+    Додати авто
+</button>
+
+<hr />
+
+<h4>Список авто:</h4>
+
+@if (vehicles == null)
+{
+    <p>Завантаження...</p>
+}
+else
+{
+    <ul>
+        @foreach (var vehicle in vehicles)
+        {
+            <li>
+                @vehicle.Brand @vehicle.Model (@vehicle.Year) —
+                @vehicle.Client?.Name
+            </li>
+        }
+    </ul>
+}
+
+@code {
+
+    private string newBrand;
+    private string newModel;
+    private int newYear;
+    private string newVin;
+
+    private int selectedClientId;
+
+    private List<Client> clients = new();
+    private List<Vehicle> vehicles = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        clients = await DbContext.Clients.ToListAsync();
+
+        vehicles = await DbContext.Vehicles
+            .Include(v => v.Client)
+            .ToListAsync();
+    }
+
+    private async Task AddVehicle()
+    {
+        if (selectedClientId == 0)
+            return;
+
+        var vehicle = new Vehicle(
+            newBrand,
+            newModel,
+            newYear,
+            newVin,
+            selectedClientId);
+
+        DbContext.Vehicles.Add(vehicle);
+        await DbContext.SaveChangesAsync();
+
+        vehicles = await DbContext.Vehicles
+            .Include(v => v.Client)
+            .ToListAsync();
+
+        newBrand = string.Empty;
+        newModel = string.Empty;
+        newVin = string.Empty;
+        newYear = 0;
+        selectedClientId = 0;
+    }
+}
