@@ -26,27 +26,6 @@ namespace AutoService.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ServiceRequests",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    TotalPrice = table.Column<decimal>(type: "TEXT", nullable: false),
-                    ClientId = table.Column<int>(type: "INTEGER", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ServiceRequests", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_ServiceRequests_Clients_ClientId",
-                        column: x => x.ClientId,
-                        principalTable: "Clients",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Vehicles",
                 columns: table => new
                 {
@@ -56,8 +35,7 @@ namespace AutoService.Infrastructure.Migrations
                     Model = table.Column<string>(type: "TEXT", nullable: false),
                     Year = table.Column<int>(type: "INTEGER", nullable: false),
                     VIN = table.Column<string>(type: "TEXT", nullable: false),
-                    ClientId = table.Column<int>(type: "INTEGER", nullable: false),
-                    ClientId1 = table.Column<int>(type: "INTEGER", nullable: true)
+                    ClientId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -68,27 +46,39 @@ namespace AutoService.Infrastructure.Migrations
                         principalTable: "Clients",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ServiceRequests",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Description = table.Column<string>(type: "TEXT", nullable: false),
+                    Price = table.Column<decimal>(type: "TEXT", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    VehicleId = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ServiceRequests", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Vehicles_Clients_ClientId1",
-                        column: x => x.ClientId1,
-                        principalTable: "Clients",
-                        principalColumn: "Id");
+                        name: "FK_ServiceRequests_Vehicles_VehicleId",
+                        column: x => x.VehicleId,
+                        principalTable: "Vehicles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_ServiceRequests_ClientId",
+                name: "IX_ServiceRequests_VehicleId",
                 table: "ServiceRequests",
-                column: "ClientId");
+                column: "VehicleId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Vehicles_ClientId",
                 table: "Vehicles",
                 column: "ClientId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Vehicles_ClientId1",
-                table: "Vehicles",
-                column: "ClientId1");
         }
 
         /// <inheritdoc />

@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AutoService.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260224191714_InitialCreate")]
+    [Migration("20260224231850_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -45,18 +45,22 @@ namespace AutoService.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("ClientId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<decimal>("TotalPrice")
+                    b.Property<string>("Description")
+                        .IsRequired()
                         .HasColumnType("TEXT");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("VehicleId")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ClientId");
+                    b.HasIndex("VehicleId");
 
                     b.ToTable("ServiceRequests");
                 });
@@ -74,9 +78,6 @@ namespace AutoService.Infrastructure.Migrations
                     b.Property<int>("ClientId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("ClientId1")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("Model")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -92,33 +93,27 @@ namespace AutoService.Infrastructure.Migrations
 
                     b.HasIndex("ClientId");
 
-                    b.HasIndex("ClientId1");
-
                     b.ToTable("Vehicles");
                 });
 
             modelBuilder.Entity("AutoService.Core.Entities.ServiceRequest", b =>
                 {
-                    b.HasOne("AutoService.Core.Entities.Client", "Client")
-                        .WithMany()
-                        .HasForeignKey("ClientId")
+                    b.HasOne("AutoService.Core.Entities.Vehicle", "Vehicle")
+                        .WithMany("ServiceRequests")
+                        .HasForeignKey("VehicleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Client");
+                    b.Navigation("Vehicle");
                 });
 
             modelBuilder.Entity("AutoService.Core.Entities.Vehicle", b =>
                 {
                     b.HasOne("AutoService.Core.Entities.Client", "Client")
-                        .WithMany()
+                        .WithMany("Vehicles")
                         .HasForeignKey("ClientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("AutoService.Core.Entities.Client", null)
-                        .WithMany("Vehicles")
-                        .HasForeignKey("ClientId1");
 
                     b.Navigation("Client");
                 });
@@ -126,6 +121,11 @@ namespace AutoService.Infrastructure.Migrations
             modelBuilder.Entity("AutoService.Core.Entities.Client", b =>
                 {
                     b.Navigation("Vehicles");
+                });
+
+            modelBuilder.Entity("AutoService.Core.Entities.Vehicle", b =>
+                {
+                    b.Navigation("ServiceRequests");
                 });
 #pragma warning restore 612, 618
         }

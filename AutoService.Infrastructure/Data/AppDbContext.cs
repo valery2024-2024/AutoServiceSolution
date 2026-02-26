@@ -18,13 +18,6 @@ public class AppDbContext : DbContext
     {
     base.OnModelCreating(modelBuilder);
 
-    // Client to Vehicles (1:N)
-    modelBuilder.Entity<Client>()
-        .HasMany<Vehicle>()
-        .WithOne(v => v.Client)
-        .HasForeignKey(v => v.ClientId)
-        .OnDelete(DeleteBehavior.Cascade);
-
     // Vehicle to ServiceRequests (1:N)
     modelBuilder.Entity<Vehicle>()
         .HasMany(v => v.ServiceRequests)

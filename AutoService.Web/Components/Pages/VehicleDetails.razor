@@ -1,0 +1,145 @@
+@page "/vehicles/{Id:int}"
+@rendermode InteractiveServer
+
+@using AutoService.Core.Entities
+@using Microsoft.EntityFrameworkCore
+@using System.Runtime.CompilerServices
+@inject AutoService.Infrastructure.Data.AppDbContext Db
+@inject NavigationManager Navigation
+
+<h3>Деталі автомобіля</h3>
+
+@if (vehicle == null)
+{
+    <p>Завантаження...</p>
+}
+else
+{
+    <div class="mb-3">
+        <strong>Марка:</strong> @vehicle.Brand <br />
+        <strong>Модель:</strong> @vehicle.Model <br />
+        <strong>Рік:</strong> @vehicle.Year <br />
+        <strong>VIN:</strong> @vehicle.VIN <br />
+    </div>
+
+    <hr />
+
+    <h4>Сервісні заявки</h4>
+
+    @if (vehicle.ServiceRequests == null || !vehicle.ServiceRequests.Any())
+    {
+        <p>Заявок ще немає.</p>
+    }
+    else
+    {
+        <ul>
+            @foreach (var sr in vehicle.ServiceRequests)
+            {
+                <li>
+                    <strong>@sr.Description</strong> —
+                    @sr.Price грн
+                    (створено: @sr.CreatedAt.ToShortDateString())
+
+                    <button class="btn btn-sm btn-danger ms-2"
+                            @onclick="() => DeleteRequest(sr.Id)">
+                        x
+                    </button>
+                </li>
+            }
+        </ul>
+    }
+
+    <hr />
+
+    <h4>Додати нову заявку</h4>
+
+    <input class="form-control mb-2"
+           placeholder="Опис"
+           @bind="newDescription" />
+
+    <input type="number"
+           class="form-control mb-2"
+           placeholder="Ціна"
+           @bind="newPrice" />
+
+    @if (errorMessage != null)
+    {
+        <div class="text-danger">@errorMessage</div>
+    }       
+
+    <button class="btn btn-primary"
+            @onclick="AddServiceRequest">
+            Додати заявку
+    </button>
+}
+
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private Vehicle? vehicle;
+
+    private string newDescription = string.Empty;
+    private decimal newPrice;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        vehicle = await Db.Vehicles
+            .Include(v => v.ServiceRequests)
+            .FirstOrDefaultAsync(v => v.Id == Id);
+    }
+
+    private async Task AddServiceRequest()
+    {
+        if (string.IsNullOrWhiteSpace(newDescription))
+        {
+            errorMessage = "Введіть опис";
+            return;
+        }
+        if (newPrice <= 0)
+        {
+            errorMessage = "Ціна повинна бути більше 0";
+            return;
+        }
+        errorMessage = null;
+        
+        if (vehicle == null) return;
+
+        var serviceRequest = new ServiceRequest
+        {
+            Description = newDescription,
+            Price = newPrice,
+            CreatedAt = DateTime.Now,
+            VehicleId = vehicle.Id
+        };
+
+        Db.ServiceRequests.Add(serviceRequest);
+        await Db.SaveChangesAsync();
+
+        //vehicle.ServiceRequests.Add(serviceRequest);
+
+        newDescription = string.Empty;
+        newPrice = 0;
+
+    
+        vehicle = await Db.Vehicles
+            .Include(v => v.ServiceRequests)
+            .FirstOrDefaultAsync(v => v.Id == Id);
+
+    }
+    private async Task DeleteRequest(int id)
+    {
+        var request = await Db.ServiceRequests.FindAsync(id);
+        if (request == null) return;
+
+        Db.ServiceRequests.Remove(request);
+        await Db.SaveChangesAsync();
+
+        vehicle = await Db.Vehicles
+            .Include(v => v.ServiceRequests)
+            .FirstOrDefaultAsync(v => v.Id == Id);
+
+    }
+}
