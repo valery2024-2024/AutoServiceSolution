@@ -34,7 +34,7 @@
         <option value="0">-- Оберіть клієнта --</option>
         @foreach (var client in clients)
         {
-            <option value="@client.Id">@client.Name</option>
+            <option value="@client.Id">@client.Name - @client.Phone</option>
         }
     </select>
 </div>

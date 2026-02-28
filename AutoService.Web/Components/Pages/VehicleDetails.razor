@@ -40,6 +40,11 @@ else
                     @sr.Price грн
                     (створено: @sr.CreatedAt.ToShortDateString())
 
+                    <button class="btn btn-sm btn-warning" 
+                            @onclick="() => StartEdit(sr)">
+                        Редагувати
+                    </button>        
+
                     <button class="btn btn-sm btn-danger ms-2"
                             @onclick="() => DeleteRequest(sr.Id)">
                         x
@@ -65,12 +70,30 @@ else
     @if (errorMessage != null)
     {
         <div class="text-danger">@errorMessage</div>
+    }
+    @if (editingRequestId == null)
+    {
+        <button type="button"
+                class="btn btn-primary"
+                @onclick="AddServiceRequest">
+            Додати заявку
+        </button>
+    }
+    else
+    {
+        <button type="button"
+                class="btn btn-success"
+                @onclick="UpdateServiceRequest">
+            Зберегти зміни
+        </button>
+
+        <button type="button"
+                class="btn btn-secondary ms-2"
+                @onclick="CancelEdit">
+            Скасувати
+        </button>
     }       
 
-    <button class="btn btn-primary"
-            @onclick="AddServiceRequest">
-            Додати заявку
-    </button>
 }
 
 
@@ -83,6 +106,7 @@ else
     private string newDescription = string.Empty;
     private decimal newPrice;
     private string? errorMessage;
+    private int? editingRequestId = null;
 
     protected override async Task OnInitializedAsync()
     {
@@ -141,5 +165,38 @@ else
             .Include(v => v.ServiceRequests)
             .FirstOrDefaultAsync(v => v.Id == Id);
 
+    }
+    private void StartEdit(ServiceRequest request)
+    {
+        editingRequestId = request.Id;
+        newDescription = request.Description;
+        newPrice = request.Price;
+    }
+    private async Task UpdateServiceRequest()
+    {
+        if (editingRequestId == null) return;
+
+        var request = await Db.ServiceRequests.FindAsync(editingRequestId);
+
+        if (request == null) return;
+
+        request.Description = newDescription;
+        request.Price = newPrice;
+
+        await Db.SaveChangesAsync();
+
+        editingRequestId = null;
+        newDescription = string.Empty;
+        newPrice = 0;
+
+        vehicle = await Db.Vehicles
+            .Include(v => v.ServiceRequests)
+            .FirstOrDefaultAsync(v => v.Id == Id);
+    }
+    private void CancelEdit()
+    {
+        editingRequestId = null;
+        newDescription = string.Empty;
+        newPrice = 0;
     }
 }

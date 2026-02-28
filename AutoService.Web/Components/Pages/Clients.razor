@@ -31,14 +31,14 @@
 }
 else
 {
-    <ul>
+    <ol>
         @foreach (var client in clients)
         {
             <li>
                 @client.Name - @client.Phone
             </li>
         }
-    </ul>
+    </ol>
 }
 
 @code {
