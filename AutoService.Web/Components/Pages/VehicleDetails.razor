@@ -1,6 +1,7 @@
 @page "/vehicles/{Id:int}"
 @rendermode InteractiveServer
 
+@using AutoService.Core.Enums
 @using AutoService.Core.Entities
 @using Microsoft.EntityFrameworkCore
 @using System.Runtime.CompilerServices
@@ -92,7 +93,18 @@ else
                 @onclick="CancelEdit">
             Скасувати
         </button>
-    }       
+    }
+
+    <hr />
+
+    <h4>Кошторис по автомобілю</h4>
+
+    <div class="card p-3 shadow-sm">
+        <p><strong>Загальна сума:</strong> @TotalSum грн</p>
+        <p><strong>Нові:</strong> @NewSum грн</p>
+        <p><strong>В роботі:</strong> @NewSum грн</p>
+        <p><strong>Виконано:</strong> @InProgressSum грн</p>
+    </div>       
 
 }
 
@@ -136,6 +148,7 @@ else
             Description = newDescription,
             Price = newPrice,
             CreatedAt = DateTime.Now,
+            Status = ServiceStatus.New,
             VehicleId = vehicle.Id
         };
 
@@ -199,4 +212,18 @@ else
         newDescription = string.Empty;
         newPrice = 0;
     }
+    private decimal TotalSum => vehicle?.ServiceRequests?.Sum(r => r.Price) ?? 0;
+
+    private decimal NewSum => vehicle?.ServiceRequests?
+        .Where(r => r.Status == ServiceStatus.New)
+        .Sum(r => r.Price) ?? 0;
+
+    private decimal InProgressSum => vehicle?.ServiceRequests?
+        .Where(r => r.Status == ServiceStatus.InProgress)
+        .Sum(r => r.Price) ?? 0;
+
+    private decimal CompletedSum => vehicle?.ServiceRequests?
+        .Where(r => r.Status == ServiceStatus.Completed)
+        .Sum(r => r.Price) ?? 0;       
+
 }

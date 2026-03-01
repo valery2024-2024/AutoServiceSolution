@@ -1,3 +1,4 @@
+using AutoService.Core.Enums;
 namespace AutoService.Core.Entities;
 
 public class ServiceRequest
@@ -9,6 +10,8 @@ public class ServiceRequest
     public decimal Price { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.Now;
+    
+    public ServiceStatus Status { get; set; } = ServiceStatus.New;
 
     // Foreign Key
     public int VehicleId { get; set; }

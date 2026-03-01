@@ -5,23 +5,30 @@ using AutoService.Web.Components;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var dbPath = Path.Combine(
-    Directory.GetCurrentDirectory(),
-    "..",
-    "autoservice.db"
-);
+var dbPath = @"D:\AutoServiceSolution\autoservice.db";
+
+Console.WriteLine("USING DB: " + dbPath);
+// Path.Combine(
+//      builder.Environment.ContentRootPath, 
+//      Directory.GetCurrentDirectory(),
+//      "..",
+//      "autoservice.db"
+//  );
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite($"Data Source={dbPath}"));
-
-// // // // builder.Services.AddDbContext<AppDbContext>(options =>
-// // // //     options.UseSqlite("Data Source=autoservice.db"));
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 var app = builder.Build();
+
+// using (var scope = app.Services.CreateScope())
+// {
+//     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+//     db.Database.Migrate();
+// }
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

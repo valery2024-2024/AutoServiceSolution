@@ -19,33 +19,65 @@ else
                 <th>Дата</th>
                 <th>Авто</th>
                 <th>Клієнт</th>
+                <th>Статус</th>
             </tr>
         </thead>
         <tbody>
             @foreach (var r in requests)
             {
-                <tr>
+                <tr class="@GetRowClass(r.Status)">
                     <td>@r.Description</td>
                     <td>@r.Price грн</td>
                     <td>@r.CreatedAt.ToShortDateString()</td>
                     <td>@r.Vehicle?.Brand @r.Vehicle?.Model</td>
                     <td>@r.Vehicle?.Client?.Name</td>
+                    <td style="min-width: 180px;">
+                        <select class="form-select" 
+                                value="@r.Status.ToString()" 
+                                @onchange="(e) => ChangeStatus(r.Id, e.Value!.ToString()!)">
+                            <option value="New">Нова</option>
+                            <option value="InProgress">В роботі</option>
+                            <option value="Completed">Виконано</option>
+                        </select>
+                    </td>
                 </tr>
             }
         </tbody>
     </table>
 }
-
 @code {
 
-    private List<ServiceRequest>? requests;
+    private List<ServiceRequest>? requests = new();
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadData();
+    }
+    private async Task LoadData()
+    {
         requests = await Db.ServiceRequests
             .Include(r => r.Vehicle)
-            .ThenInclude(v => v.Client)
+                .ThenInclude(v => v.Client)
             .OrderByDescending(r => r.CreatedAt)
             .ToListAsync();
     }
+
+    private async Task ChangeStatus(int id, string status)
+    {
+        var request = await Db.ServiceRequests.FindAsync(id);
+        if (request == null) return;
+
+        request.Status = Enum.Parse<AutoService.Core.Enums.ServiceStatus>(status);
+
+        await Db.SaveChangesAsync();
+
+        await LoadData();
+    }
+    private static string GetRowClass(AutoService.Core.Enums.ServiceStatus status) => status switch
+    {
+        AutoService.Core.Enums.ServiceStatus.New => "Нова",
+        AutoService.Core.Enums.ServiceStatus.InProgress => "В роботі",
+        AutoService.Core.Enums.ServiceStatus.Completed => "Виконано",
+        _ => status.ToString()
+    };
 }
