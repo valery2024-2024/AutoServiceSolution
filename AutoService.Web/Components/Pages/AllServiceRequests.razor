@@ -1,0 +1,51 @@
+@page "/service-requests"
+@using AutoService.Core.Entities
+@using Microsoft.EntityFrameworkCore
+@inject AutoService.Infrastructure.Data.AppDbContext Db
+
+<h3>Всі заявки СТО</h3>
+
+@if (requests == null)
+{
+    <p>Завантаження...</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Опис</th>
+                <th>Ціна</th>
+                <th>Дата</th>
+                <th>Авто</th>
+                <th>Клієнт</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var r in requests)
+            {
+                <tr>
+                    <td>@r.Description</td>
+                    <td>@r.Price грн</td>
+                    <td>@r.CreatedAt.ToShortDateString()</td>
+                    <td>@r.Vehicle?.Brand @r.Vehicle?.Model</td>
+                    <td>@r.Vehicle?.Client?.Name</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+
+    private List<ServiceRequest>? requests;
+
+    protected override async Task OnInitializedAsync()
+    {
+        requests = await Db.ServiceRequests
+            .Include(r => r.Vehicle)
+            .ThenInclude(v => v.Client)
+            .OrderByDescending(r => r.CreatedAt)
+            .ToListAsync();
+    }
+}
