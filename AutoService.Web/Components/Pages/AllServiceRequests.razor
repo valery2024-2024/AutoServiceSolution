@@ -34,7 +34,7 @@ else
                     <td style="min-width: 180px;">
                         <select class="form-select" 
                                 value="@r.Status.ToString()" 
-                                @onchange="(e) => ChangeStatus(r.Id, e.Value!.ToString()!)">
+                                @onchange="async (e) => await ChangeStatus(r.Id, e.Value!.ToString()!)">
                             <option value="New">Нова</option>
                             <option value="InProgress">В роботі</option>
                             <option value="Completed">Виконано</option>
@@ -73,11 +73,18 @@ else
 
         await LoadData();
     }
+    @* private static string GetRowClass(ServiceStatus status) => status switch
+    {
+        ServiceStatus.New => "table-warning",
+        ServiceStatus.InProgress => "table-info",
+        ServiceStatus.Completed => "table-success",
+        _ => ""
+    }; *@
     private static string GetRowClass(AutoService.Core.Enums.ServiceStatus status) => status switch
     {
-        AutoService.Core.Enums.ServiceStatus.New => "Нова",
-        AutoService.Core.Enums.ServiceStatus.InProgress => "В роботі",
-        AutoService.Core.Enums.ServiceStatus.Completed => "Виконано",
+        AutoService.Core.Enums.ServiceStatus.New => "table-warning",
+        AutoService.Core.Enums.ServiceStatus.InProgress => "table-info",
+        AutoService.Core.Enums.ServiceStatus.Completed => "table-success",
         _ => status.ToString()
     };
 }
