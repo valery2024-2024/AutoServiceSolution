@@ -70,6 +70,18 @@ direction TB
         }
 
 	}
+	namespace WorkPaternespace {
+        class IUnitOfWork {
+	        +Clients IClientRepository
+	        +Vehicles IVehicleRepository
+	        +ServiceRequests IServiceRequestRepository
+	        +SaveChanges()
+        }
+
+        class EfUnitOfWork {
+        }
+
+	}
     class Client {
 	    +int Id
 	    +string Name
@@ -113,16 +125,6 @@ direction TB
     class ServiceRequestService {
     }
 
-    class IUnitOfWork {
-	    +Clients IClientRepository
-	    +Vehicles IVehicleRepository
-	    +ServiceRequests IServiceRequestRepository
-	    +SaveChanges()
-    }
-
-    class EfUnitOfWork {
-    }
-
     class AppDbContext {
     }
 
@@ -136,15 +138,18 @@ direction TB
 	    +ChangeStatus()
     }
 
+    class UntitledClass {
+    }
+
 	<<interface>> IPricingStrategy
 	<<interface>> IServiceRequestState
 	<<interface>> IServiceRequestFactory
 	<<interface>> IServiceRequestRepository
 	<<interface>> IVehicleRepository
 	<<interface>> IClientRepository
+	<<interface>> IUnitOfWork
 	<<enumeration>> ServiceStatus
 	<<interface>> IServiceRequestService
-	<<interface>> IUnitOfWork
 
     Client "1" --> "0..*" Vehicle
     Vehicle "1" --> "0..*" ServiceRequest
@@ -174,4 +179,5 @@ direction TB
     EfServiceRequestRepository --> AppDbContext
     AllServiceRequestsPage --> IServiceRequestService
     VehicleDetailsPage --> IServiceRequestService
+    ServiceRequest -- UntitledClass
 ```
